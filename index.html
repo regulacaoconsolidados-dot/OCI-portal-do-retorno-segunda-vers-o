@@ -683,10 +683,26 @@
                                 <div><label class="form-label text-indigo-600">Bairro</label><input type="text" id="bairro" class="input-field campo-bloqueado" readonly></div>
                                 <div><label class="form-label text-indigo-600">Município</label><input type="text" id="municipio" class="input-field campo-bloqueado" readonly></div>
                                 <div><label class="form-label text-indigo-600">UF</label><input type="text" id="uf" class="input-field campo-bloqueado" readonly maxlength="2"></div>
-                                <div><label class="form-label text-indigo-600">Sexo *</label><input type="text" id="sexo" class="input-field campo-bloqueado" readonly></div>
-                                <div><label class="form-label text-indigo-600">Raça/Cor *</label><input type="text" id="racaCor" class="input-field campo-bloqueado" readonly></div>
-                            </div>
-                        </div>
+                                <div>
+    <label class="form-label text-indigo-600">Sexo *</label>
+    <select id="sexo" class="input-field">
+        <option value="">Selecione...</option>
+        <option value="Masculino">Masculino</option>
+        <option value="Feminino">Feminino</option>
+        <option value="Outro">Outro</option>
+    </select>
+</div>
+<div>
+    <label class="form-label text-indigo-600">Raça/Cor *</label>
+    <select id="racaCor" class="input-field">
+        <option value="">Selecione...</option>
+        <option value="Branca">Branca</option>
+        <option value="Preta">Preta</option>
+        <option value="Parda">Parda</option>
+        <option value="Amarela">Amarela</option>
+        <option value="Indígena">Indígena</option>
+    </select>
+</div>
 
                         <!-- EXAMES -->
                         <div class="bg-gradient-to-br from-red-50 to-rose-50 rounded-2xl p-5 mb-6 border-2 border-red-100">
@@ -1051,7 +1067,7 @@ function toast(msg, type) {
 // BLOQUEIO DE CAMPOS
 // ============================================
 function bloquearCamposSensiveis(bloquear) {
-    var campos = ['nomePacienteRetorno','cpfPacienteRetorno','dataNascimentoRetorno','nomeMaeRetorno','telefoneRetorno','logradouro','numero','complemento','bairro','municipio','uf','cep','sexo','racaCor','unidadeSaude'];
+    var campos = ['nomePacienteRetorno','cpfPacienteRetorno','dataNascimentoRetorno','nomeMaeRetorno','telefoneRetorno','logradouro','numero','complemento','bairro','municipio','uf','cep','unidadeSaude'];
     campos.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) {
@@ -1117,8 +1133,7 @@ async function buscarPrimeiraConsulta() {
                     if (p2) paciente = p2;
                 }
 
-                // 4. 🔥 PREENCHE COM PRIORIDADE NA LINHA_CUIDADO
-                // Se a linha_cuidado tiver o dado, usa ele. Senão, usa do pacientes.
+                // 4. PREENCHE COM PRIORIDADE NA LINHA_CUIDADO
                 const campoNome = consulta.nome_paciente || (paciente ? paciente.nome : '') || '';
                 const campoCpf = consulta.cpf_paciente || (paciente ? paciente.cpf : '') || '';
                 const campoDataNasc = consulta.data_nascimento || (paciente ? paciente.data_nascimento : '') || '';
@@ -1131,9 +1146,11 @@ async function buscarPrimeiraConsulta() {
                 const campoMunicipio = consulta.municipio || (paciente ? paciente.municipio : '') || '';
                 const campoUf = consulta.uf || (paciente ? paciente.uf : '') || '';
                 const campoCep = consulta.cep || (paciente ? paciente.cep : '') || '';
+                const campoUbs = consulta.unidade_basica_saude || (paciente ? paciente.unidade_saude : '') || '';
+
+                // 🔥 SEXO E RAÇA/COR: vêm preenchidos se existirem
                 const campoSexo = (paciente ? paciente.sexo : '') || '';
                 const campoRaca = (paciente ? paciente.raca_cor : '') || '';
-                const campoUbs = consulta.unidade_basica_saude || (paciente ? paciente.unidade_saude : '') || '';
 
                 document.getElementById('nomePacienteRetorno').value = campoNome;
                 document.getElementById('cpfPacienteRetorno').value = formatarCPF(campoCpf) || '';
@@ -1147,9 +1164,15 @@ async function buscarPrimeiraConsulta() {
                 document.getElementById('municipio').value = campoMunicipio;
                 document.getElementById('uf').value = campoUf;
                 document.getElementById('cep').value = campoCep;
-                document.getElementById('sexo').value = campoSexo;
-                document.getElementById('racaCor').value = campoRaca;
                 document.getElementById('unidadeSaude').value = campoUbs;
+
+                // 🔥 SEXO E RAÇA/COR — preenche SE existir, senão fica vazio para escolher
+                document.getElementById('sexo').value = campoSexo || '';
+                document.getElementById('racaCor').value = campoRaca || '';
+
+                // 🔥 Destaque visual amarelo se estiver vazio
+                document.getElementById('sexo').classList.toggle('obrigatorio-vazio', !campoSexo);
+                document.getElementById('racaCor').classList.toggle('obrigatorio-vazio', !campoRaca);
 
                 bloquearCamposSensiveis(true);
 
@@ -1158,13 +1181,13 @@ async function buscarPrimeiraConsulta() {
                 document.getElementById('especialidadeRetorno').value = ESPECIALIDADES_MAP[consulta.especialidade_id] || '';
                 document.getElementById('medicoSolicitanteRetorno').value = consulta.medico_solicitante || '';
                 document.getElementById('localConsultaRetorno').value = consulta.local_consulta || '';
-                document.getElementById('dataPrimeiraConsultaRetorno').value = consulta.data_agendada ? String(consulta.data_agendada).split('T')[0] : '';
+                document.getElementById('dataPrimeiraConsultaRetorno').value = consulta.data_agendada ? formatarData(consulta.data_agendada) : '';
 
                 // 6. Mensagem
                 if (paciente) {
-                    mostrarMsg('msgBusca', '✅ Dados preenchidos! (Linha do Cuidado + Pacientes)', 'emerald');
+                    mostrarMsg('msgBusca', '✅ Dados preenchidos! Confira Sexo e Raça/Cor antes de prosseguir.', 'emerald');
                 } else {
-                    mostrarMsg('msgBusca', '✅ Dados preenchidos pela Linha do Cuidado!', 'emerald');
+                    mostrarMsg('msgBusca', '✅ Dados preenchidos pela Linha do Cuidado! Confira Sexo e Raça/Cor.', 'emerald');
                 }
 
             } catch (e) {
