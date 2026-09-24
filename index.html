@@ -1275,11 +1275,23 @@ function fecharModalSelecaoExames() {
 
 function toggleExameModal(idx, codigo, nome) {
     const check = document.getElementById(`checkExameModal_${idx}`);
-    const dataSol = document.getElementById(`dataSolModal_${idx}`).value;
-    const dataReal = document.getElementById(`dataRealModal_${idx}`).value;
+    const dataSolEl = document.getElementById(`dataSolModal_${idx}`);
+    const dataRealEl = document.getElementById(`dataRealModal_${idx}`);
+    const dataSol = dataSolEl ? dataSolEl.value : '';
+    const dataReal = dataRealEl ? dataRealEl.value : '';
+    
     if (check.checked) {
-        if (!examesSelecionados.find(e => e.codigo === codigo)) {
-            examesSelecionados.push({ codigo, nome, data_solicitacao: dataSol || null, data_realizacao: dataReal || null });
+        const existente = examesSelecionados.find(e => e.codigo === codigo);
+        if (!existente) {
+            examesSelecionados.push({ 
+                codigo, 
+                nome, 
+                data_solicitacao: dataSol || null, 
+                data_realizacao: dataReal || null 
+            });
+        } else {
+            existente.data_solicitacao = dataSol || null;
+            existente.data_realizacao = dataReal || null;
         }
     } else {
         examesSelecionados = examesSelecionados.filter(e => e.codigo !== codigo);
@@ -1289,15 +1301,30 @@ function toggleExameModal(idx, codigo, nome) {
 
 function atualizarDataExameModal(idx) {
     const check = document.getElementById(`checkExameModal_${idx}`);
-    if (!check || !check.checked) return;
+    if (!check) return;
+    
     const codigo = subgrupoSelecionado && subgrupoSelecionado.exames[idx] ? subgrupoSelecionado.exames[idx].codigo : null;
     if (!codigo) return;
-    const dataSol = document.getElementById(`dataSolModal_${idx}`).value;
-    const dataReal = document.getElementById(`dataRealModal_${idx}`).value;
-    const exame = examesSelecionados.find(e => e.codigo === codigo);
-    if (exame) {
-        exame.data_solicitacao = dataSol || null;
-        exame.data_realizacao = dataReal || null;
+    
+    const dataSolEl = document.getElementById(`dataSolModal_${idx}`);
+    const dataRealEl = document.getElementById(`dataRealModal_${idx}`);
+    const dataSol = dataSolEl ? dataSolEl.value : '';
+    const dataReal = dataRealEl ? dataRealEl.value : '';
+    
+    if (check.checked) {
+        let exame = examesSelecionados.find(e => e.codigo === codigo);
+        if (!exame) {
+            const nome = subgrupoSelecionado.exames[idx].nome;
+            examesSelecionados.push({ 
+                codigo, 
+                nome, 
+                data_solicitacao: dataSol || null, 
+                data_realizacao: dataReal || null 
+            });
+        } else {
+            exame.data_solicitacao = dataSol || null;
+            exame.data_realizacao = dataReal || null;
+        }
     }
     atualizarContadorModal();
 }
@@ -1473,8 +1500,24 @@ async function editarExame(id) {
     hideLoading();
 
     if (!solicitacao) { toast('❌ Solicitação não encontrada!', 'error'); return; }
+    
+    // 🔥 CORRIGIDO: usa exames_solicitados (TODOS) em vez de exames_realizados (só os feitos)
     let exames = [];
-    try { exames = JSON.parse(solicitacao.exames_solicitados || '[]'); } catch (e) { exames = []; }
+    try { 
+        exames = JSON.parse(solicitacao.exames_solicitados || '[]'); 
+    } catch (e) { 
+        exames = []; 
+    }
+    
+    // 🔥 FALLBACK: se por algum motivo não tiver em exames_solicitados, tenta exames_realizados
+    if (exames.length === 0) {
+        try { 
+            exames = JSON.parse(solicitacao.exames_realizados || '[]'); 
+        } catch (e) { 
+            exames = []; 
+        }
+    }
+    
     if (exames.length === 0) { toast('❌ Nenhum exame para editar!', 'warning'); return; }
 
     edicaoExameId = id;
@@ -1484,9 +1527,13 @@ async function editarExame(id) {
     let html = '';
     exames.forEach(function(exame, idx) {
         const dataRealValue = exame.data_realizacao ? String(exame.data_realizacao).split('T')[0] : '';
+        const dataSolValue = exame.data_solicitacao ? String(exame.data_solicitacao).split('T')[0] : '';
+        
         html += '<div class="border-2 border-slate-200 rounded-xl p-4 bg-gradient-to-br from-white to-slate-50">';
         html += '<p class="font-extrabold text-sm text-slate-800">' + exame.codigo + ' - ' + exame.nome + '</p>';
-        html += '<label class="text-xs text-slate-500 font-bold block mt-3 mb-1">📅 Data Realização</label>';
+        html += '<label class="text-xs text-slate-500 font-bold block mt-3 mb-1">📅 Data Solicitação</label>';
+        html += '<input type="date" id="editDataSol_' + idx + '" value="' + dataSolValue + '" class="input-field py-2 text-sm mb-2">';
+        html += '<label class="text-xs text-slate-500 font-bold block mb-1">📅 Data Realização</label>';
         html += '<input type="date" id="editDataReal_' + idx + '" value="' + dataRealValue + '" class="input-field py-2 text-sm">';
         html += '</div>';
     });
@@ -1498,14 +1545,18 @@ async function editarExame(id) {
 async function salvarEdicaoExame() {
     if (!edicaoExameDados) return;
     
+    // Reconstrói os exames lendo CADA input individualmente
     const examesAtualizados = edicaoExameDados.exames.map(function(exame, idx) {
-        const inputEl = document.getElementById('editDataReal_' + idx);
-        const dataReal = inputEl ? inputEl.value : '';
+        const inputSol = document.getElementById('editDataSol_' + idx);
+        const inputReal = document.getElementById('editDataReal_' + idx);
+        const dataSol = inputSol ? inputSol.value : '';
+        const dataReal = inputReal ? inputReal.value : '';
+        
         return {
             codigo: exame.codigo,
             nome: exame.nome,
-            data_solicitacao: exame.data_solicitacao || null,
-            data_realizacao: dataReal ? dataReal : null
+            data_solicitacao: dataSol || exame.data_solicitacao || null,
+            data_realizacao: dataReal || null
         };
     });
 
