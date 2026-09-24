@@ -208,6 +208,7 @@
 </head>
 <body>
 
+
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- ============ LOADING ============ -->
@@ -462,6 +463,7 @@
     </div>
 </div>
 
+
 <!-- ============ TELA 1: LOGIN ============ -->
 <div id="screenLogin" class="screen active gradient-bg">
     <div class="bg-white/95 backdrop-blur-xl rounded-3xl p-8 md:p-10 w-full max-w-md shadow-2xl text-center mx-4 border border-white/20">
@@ -606,7 +608,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-emerald-700">
                         <p class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 🔍 Digite o <strong>Nº da 1ª Consulta</strong> para buscar</p>
                         <p class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 📋 Dados sensíveis são <strong>preenchidos automaticamente</strong></p>
-                        <p class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 🔒 Campos sensíveis ficam <strong>bloqueados</strong> para edição</p>
+                        <p class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> ✏️ <strong>Sexo</strong> e <strong>Raça/Cor</strong> são preenchidos por você</p>
                         <p class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> ✅ Você pode <strong>editar exames</strong> (data de realização)</p>
                         <p class="flex items-center gap-2 md:col-span-2"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> ⚠️ <strong>Não gera número de retorno</strong> — o registro fica no mesmo número da 1ª consulta</p>
                     </div>
@@ -646,7 +648,7 @@
                                 <div><label class="form-label text-blue-600">Especialidade</label><input type="text" id="especialidadeRetorno" readonly class="input-field campo-bloqueado"></div>
                                 <div><label class="form-label text-blue-600">Médico Solicitante</label><input type="text" id="medicoSolicitanteRetorno" readonly class="input-field campo-bloqueado"></div>
                                 <div><label class="form-label text-blue-600">Local da Consulta</label><input type="text" id="localConsultaRetorno" readonly class="input-field campo-bloqueado"></div>
-                                <div class="md:col-span-2"><label class="form-label text-blue-600">Data da 1ª Consulta</label><input type="text" id="dataPrimeiraConsultaRetorno" readonly class="input-field campo-bloqueado"></div>
+                                <div class="md:col-span-2"><label class="form-label text-blue-600">Data da 1ª Consulta</label><input type="text" id="dataPrimeiraConsultaRetorno" readonly class="input-field campo-bloqueado" placeholder="DD/MM/AAAA"></div>
                             </div>
                             <div id="msgBusca" class="mt-3 hidden"></div>
                         </div>
@@ -684,25 +686,27 @@
                                 <div><label class="form-label text-indigo-600">Município</label><input type="text" id="municipio" class="input-field campo-bloqueado" readonly></div>
                                 <div><label class="form-label text-indigo-600">UF</label><input type="text" id="uf" class="input-field campo-bloqueado" readonly maxlength="2"></div>
                                 <div>
-    <label class="form-label text-indigo-600">Sexo *</label>
-    <select id="sexo" class="input-field">
-        <option value="">Selecione...</option>
-        <option value="Masculino">Masculino</option>
-        <option value="Feminino">Feminino</option>
-        <option value="Outro">Outro</option>
-    </select>
-</div>
-<div>
-    <label class="form-label text-indigo-600">Raça/Cor *</label>
-    <select id="racaCor" class="input-field">
-        <option value="">Selecione...</option>
-        <option value="Branca">Branca</option>
-        <option value="Preta">Preta</option>
-        <option value="Parda">Parda</option>
-        <option value="Amarela">Amarela</option>
-        <option value="Indígena">Indígena</option>
-    </select>
-</div>
+                                    <label class="form-label text-indigo-600">Sexo *</label>
+                                    <select id="sexo" class="input-field">
+                                        <option value="">Selecione...</option>
+                                        <option value="Masculino">Masculino</option>
+                                        <option value="Feminino">Feminino</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label text-indigo-600">Raça/Cor *</label>
+                                    <select id="racaCor" class="input-field">
+                                        <option value="">Selecione...</option>
+                                        <option value="Branca">Branca</option>
+                                        <option value="Preta">Preta</option>
+                                        <option value="Parda">Parda</option>
+                                        <option value="Amarela">Amarela</option>
+                                        <option value="Indígena">Indígena</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- EXAMES -->
                         <div class="bg-gradient-to-br from-red-50 to-rose-50 rounded-2xl p-5 mb-6 border-2 border-red-100">
@@ -803,10 +807,11 @@
     </div>
 </div>
 
+
 <script>
 // ============================================
-// 🏥 PORTAL DO RETORNO v7.0 - PARTE A
-// Config + Login + SIGTAP + Busca
+// 🏥 PORTAL DO RETORNO v7.0
+// Config + SIGTAP + UBS + Helpers
 // ============================================
 
 const SUPABASE_URL = 'https://qgrpqsvsxidxezsonasb.supabase.co';
@@ -946,7 +951,6 @@ const DISTRITO_MAP = {
 };
 const LISTA_UBS = Object.keys(DISTRITO_MAP).sort();
 
-
 const ESPECIALIDADES_MAP = { 
     1: '🫀 Cardiologia', 2: '🦴 Ortopedia', 3: '🎗️ Oncologia', 
     4: '👁️ Oftalmologia', 5: '👂 Otorrino', 6: '👩 Saúde da Mulher'
@@ -1064,9 +1068,10 @@ function toast(msg, type) {
 }
 
 // ============================================
-// BLOQUEIO DE CAMPOS
+// BLOQUEIO DE CAMPOS (SEM SEXO E RAÇA/COR)
 // ============================================
 function bloquearCamposSensiveis(bloquear) {
+    // ✅ Sexo e Raça/Cor NÃO estão nesta lista — ficam SEMPRE editáveis
     var campos = ['nomePacienteRetorno','cpfPacienteRetorno','dataNascimentoRetorno','nomeMaeRetorno','telefoneRetorno','logradouro','numero','complemento','bairro','municipio','uf','cep','unidadeSaude'];
     campos.forEach(function(id) {
         var el = document.getElementById(id);
@@ -1097,7 +1102,6 @@ async function buscarPrimeiraConsulta() {
         timeoutBusca = setTimeout(async () => {
             showLoading();
             try {
-                // 1. Busca o registro na linha_cuidado
                 let { data: consulta } = await db.from('linha_cuidado').select('*').eq('numero_solicitacao', valor).eq('status', 'recepcionada').maybeSingle();
                 if (!consulta && !isNaN(valor)) {
                     const { data: consultaNum } = await db.from('linha_cuidado').select('*').eq('numero_solicitacao', parseInt(valor)).eq('status', 'recepcionada').maybeSingle();
@@ -1111,7 +1115,6 @@ async function buscarPrimeiraConsulta() {
                     return;
                 }
 
-                // 2. Verifica oftalmologia
                 if (consulta.especialidade_id === 4) {
                     mostrarMsg('msgBusca', '❌ Paciente de OFTALMOLOGIA não pode solicitar retorno.', 'rose');
                     limparCamposBusca();
@@ -1121,9 +1124,7 @@ async function buscarPrimeiraConsulta() {
 
                 dadosPrimeiraConsulta = consulta;
 
-                // 3. Tenta achar o paciente na tabela pacientes (para COMPLEMENTAR)
                 let paciente = null;
-
                 if (consulta.paciente_id) {
                     const { data: p1 } = await db.from('pacientes').select('*').eq('id', consulta.paciente_id).maybeSingle();
                     if (p1) paciente = p1;
@@ -1133,7 +1134,6 @@ async function buscarPrimeiraConsulta() {
                     if (p2) paciente = p2;
                 }
 
-                // 4. PREENCHE COM PRIORIDADE NA LINHA_CUIDADO
                 const campoNome = consulta.nome_paciente || (paciente ? paciente.nome : '') || '';
                 const campoCpf = consulta.cpf_paciente || (paciente ? paciente.cpf : '') || '';
                 const campoDataNasc = consulta.data_nascimento || (paciente ? paciente.data_nascimento : '') || '';
@@ -1147,8 +1147,6 @@ async function buscarPrimeiraConsulta() {
                 const campoUf = consulta.uf || (paciente ? paciente.uf : '') || '';
                 const campoCep = consulta.cep || (paciente ? paciente.cep : '') || '';
                 const campoUbs = consulta.unidade_basica_saude || (paciente ? paciente.unidade_saude : '') || '';
-
-                // 🔥 SEXO E RAÇA/COR: vêm preenchidos se existirem
                 const campoSexo = (paciente ? paciente.sexo : '') || '';
                 const campoRaca = (paciente ? paciente.raca_cor : '') || '';
 
@@ -1176,14 +1174,12 @@ async function buscarPrimeiraConsulta() {
 
                 bloquearCamposSensiveis(true);
 
-                // 5. Preenche os dados da consulta
                 document.getElementById('prontuarioPaciente').value = consulta.prontuario || '';
                 document.getElementById('especialidadeRetorno').value = ESPECIALIDADES_MAP[consulta.especialidade_id] || '';
                 document.getElementById('medicoSolicitanteRetorno').value = consulta.medico_solicitante || '';
                 document.getElementById('localConsultaRetorno').value = consulta.local_consulta || '';
                 document.getElementById('dataPrimeiraConsultaRetorno').value = consulta.data_agendada ? formatarData(consulta.data_agendada) : '';
 
-                // 6. Mensagem
                 if (paciente) {
                     mostrarMsg('msgBusca', '✅ Dados preenchidos! Confira Sexo e Raça/Cor antes de prosseguir.', 'emerald');
                 } else {
@@ -1207,6 +1203,7 @@ function limparCamposBusca() {
     dadosPrimeiraConsulta = null;
     bloquearCamposSensiveis(false);
 }
+
 
 // ============================================
 // DROPDOWN SIGTAP
@@ -1359,6 +1356,8 @@ function limparFormularioSolicitar() {
     bloquearCamposSensiveis(false);
     document.getElementById('msgBusca').classList.add('hidden');
     document.getElementById('msgSolicitar').classList.add('hidden');
+    document.getElementById('sexo').classList.remove('obrigatorio-vazio');
+    document.getElementById('racaCor').classList.remove('obrigatorio-vazio');
 }
 
 // ============================================
@@ -1373,15 +1372,30 @@ document.addEventListener('click', function(e) {
 });
 
 // ============================================
-// SOLICITAR RETORNO 
+// SOLICITAR RETORNO — COM VALIDAÇÃO DE SEXO E RAÇA/COR
 // ============================================
 document.getElementById('btnValidarRetorno').addEventListener('click', async () => {
     const ns = document.getElementById('numeroSolicitacao').value.trim();
     const un = document.getElementById('unidadeSaude').value.trim();
     const cs = document.getElementById('sigtapSelecionado').value;
+    const sexoValor = document.getElementById('sexo').value.trim();
+    const racaValor = document.getElementById('racaCor').value.trim();
 
     if (!ns) return alert('❌ Informe o Nº da Solicitação!');
     if (!un) return alert('❌ Selecione a Unidade de Saúde!');
+    
+    // 🔥 VALIDAÇÃO OBRIGATÓRIA DE SEXO E RAÇA/COR
+    if (!sexoValor) {
+        document.getElementById('sexo').classList.add('obrigatorio-vazio');
+        document.getElementById('sexo').focus();
+        return alert('❌ Selecione o SEXO do paciente!');
+    }
+    if (!racaValor) {
+        document.getElementById('racaCor').classList.add('obrigatorio-vazio');
+        document.getElementById('racaCor').focus();
+        return alert('❌ Selecione a RAÇA/COR do paciente!');
+    }
+    
     if (!cs) return alert('❌ Selecione o SubGrupo SIGTAP!');
     if (examesSelecionados.length === 0) return alert('❌ Selecione pelo menos 1 exame!');
     if (!dadosPrimeiraConsulta) return mostrarMsg('msgSolicitar', '❌ Nº Solicitação não encontrado ou não está RECEPCIONADA!', 'rose');
@@ -1406,8 +1420,8 @@ document.getElementById('btnValidarRetorno').addEventListener('click', async () 
         municipio: document.getElementById('municipio').value.trim(),
         uf: document.getElementById('uf').value.trim().toUpperCase(),
         cep: document.getElementById('cep').value.replace(/\D/g, ''),
-        sexo: document.getElementById('sexo').value.trim(),
-        raca_cor: document.getElementById('racaCor').value.trim(),
+        sexo: sexoValor,
+        raca_cor: racaValor,
         unidade_saude: un,
         updated_at: new Date().toISOString()
     };
@@ -1484,32 +1498,20 @@ async function editarExame(id) {
 async function salvarEdicaoExame() {
     if (!edicaoExameDados) return;
     
-    // Reconstrói os exames lendo CADA input individualmente
     const examesAtualizados = edicaoExameDados.exames.map(function(exame, idx) {
         const inputEl = document.getElementById('editDataReal_' + idx);
         const dataReal = inputEl ? inputEl.value : '';
-        
-        // ⚠️ Log pra debug (pode tirar depois)
-        console.log('Exame ' + idx + ' (' + exame.codigo + '):', {
-            input_id: 'editDataReal_' + idx,
-            valor_lido: dataReal,
-            data_anterior: exame.data_realizacao
-        });
-        
         return {
             codigo: exame.codigo,
             nome: exame.nome,
             data_solicitacao: exame.data_solicitacao || null,
-            data_realizacao: dataReal ? dataReal : null   // Vazio = null, não pega do anterior
+            data_realizacao: dataReal ? dataReal : null
         };
     });
 
     const examesRealizados = examesAtualizados.filter(function(e) { return e.data_realizacao; });
     const todosRealizados = examesAtualizados.length > 0 && examesAtualizados.every(function(e) { return e.data_realizacao; });
     const novoStatus = todosRealizados ? 'apto_retorno' : 'aguardando_exame';
-
-    console.log('📤 Enviando para o banco:', JSON.stringify(examesAtualizados, null, 2));
-    console.log('📊 Todos realizados?', todosRealizados, '| Novo status:', novoStatus);
 
     showLoading();
     const { error } = await db.from('linha_cuidado').update({
@@ -1531,6 +1533,7 @@ async function salvarEdicaoExame() {
     await carregarPortal();
 }
 
+
 // ============================================
 // 👁️ VISUALIZAR
 // ============================================
@@ -1550,6 +1553,8 @@ async function visualizarSolicitacao(id) {
             <div class="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-xl border-2 border-blue-100"><span class="text-xs text-blue-600 font-bold uppercase">Prontuário</span><p class="font-extrabold text-blue-800 text-lg">${s.prontuario || '—'}</p></div>
             <div class="bg-slate-50 p-4 rounded-xl col-span-2"><span class="text-xs text-slate-500 font-bold uppercase">Paciente</span><p class="font-extrabold text-slate-800">${s.pacientes?.nome || s.nome_paciente || '—'}</p></div>
             <div class="bg-slate-50 p-4 rounded-xl"><span class="text-xs text-slate-500 font-bold uppercase">CPF</span><p class="font-bold">${formatarCPF(s.pacientes?.cpf || s.cpf_paciente)}</p></div>
+            <div class="bg-slate-50 p-4 rounded-xl"><span class="text-xs text-slate-500 font-bold uppercase">Sexo</span><p class="font-bold">${s.pacientes?.sexo || '—'}</p></div>
+            <div class="bg-slate-50 p-4 rounded-xl"><span class="text-xs text-slate-500 font-bold uppercase">Raça/Cor</span><p class="font-bold">${s.pacientes?.raca_cor || '—'}</p></div>
             <div class="bg-slate-50 p-4 rounded-xl"><span class="text-xs text-slate-500 font-bold uppercase">Status</span><p class="font-bold">${s.status}</p></div>
             <div class="bg-slate-50 p-4 rounded-xl"><span class="text-xs text-slate-500 font-bold uppercase">Cadastrado por</span><p class="font-bold">${s.usuario_cadastrou || '—'}</p></div>
             <div class="bg-slate-50 p-4 rounded-xl"><span class="text-xs text-slate-500 font-bold uppercase">Data</span><p class="font-bold">${formatarDataHora(s.updated_at || s.created_at)}</p></div>
@@ -1686,7 +1691,6 @@ async function carregarPortal() {
     if (usuarioLogado.tipo === 'admin') menuAdmin.classList.remove('hidden');
     else menuAdmin.classList.add('hidden');
 
-    // 🔥 Agora busca os P COM EXAMES (não os R)
     let query = db.from('linha_cuidado').select('*, pacientes(*)')
         .eq('tipo_servico', 'P')
         .not('exames_solicitados', 'is', null)
@@ -1702,7 +1706,6 @@ async function carregarPortal() {
     const total = todosRetornos.length;
     const aguardando = todosRetornos.filter(r => r.status === 'aguardando_exame').length;
     const aptos = todosRetornos.filter(r => r.status === 'apto_retorno').length;
-    const agendados = todosRetornos.filter(r => r.status === 'retorno_agendado' || r.status === 'retorno_recepcionado').length;
 
     document.getElementById('infoCards').innerHTML = `
         <div class="kpi-card kpi-emerald"><p class="text-[10px] uppercase font-extrabold opacity-80">👤 Usuário</p><p class="text-sm font-extrabold truncate mt-1">${usuarioLogado.nome || '—'}</p></div>
@@ -1845,6 +1848,7 @@ function switchTab(tabId) {
     if (ct) ct.classList.add('active');
     if (tabId === 'historico') renderizarHistorico();
 }
+
 
 // ============================================
 // 👑 ADMIN PORTAL
@@ -2035,7 +2039,7 @@ window.addEventListener('load', () => {
     showScreen('screenLogin');
     console.log('✅ PORTAL DO RETORNO v7.0 - PRONTO!');
     console.log('👑 Ana Paula Araújo da Silva | Mat: 201704');
-    console.log('🎨 Visual caprichado + Lógica P↔R corrigida');
+    console.log('🔥 Sexo/Raça editáveis + Data DD/MM/YYYY');
 });
 </script>
 </body>
