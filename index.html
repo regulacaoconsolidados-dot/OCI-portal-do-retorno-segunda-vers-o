@@ -1250,7 +1250,10 @@ function abrirModalSelecaoExames() {
     } else {
         let html = '';
         exames.forEach(function(e, idx) {
-            const jaSelecionado = examesSelecionados.find(function(x) { return x.codigo === e.codigo; });
+            // 🔥 USA CÓDIGO + NOME para identificar (não só código)
+            const jaSelecionado = examesSelecionados.find(function(x) { 
+                return x.codigo === e.codigo && x.nome === e.nome; 
+            });
             const dataSolValue = jaSelecionado && jaSelecionado.data_solicitacao ? String(jaSelecionado.data_solicitacao).split('T')[0] : '';
             const dataRealValue = jaSelecionado && jaSelecionado.data_realizacao ? String(jaSelecionado.data_realizacao).split('T')[0] : '';
             
@@ -1281,7 +1284,8 @@ function toggleExameModal(idx, codigo, nome) {
     const dataReal = dataRealEl ? dataRealEl.value : '';
     
     if (check.checked) {
-        const existente = examesSelecionados.find(e => e.codigo === codigo);
+        // 🔥 USA CÓDIGO + NOME como chave única
+        const existente = examesSelecionados.find(e => e.codigo === codigo && e.nome === nome);
         if (!existente) {
             examesSelecionados.push({ 
                 codigo, 
@@ -1294,7 +1298,8 @@ function toggleExameModal(idx, codigo, nome) {
             existente.data_realizacao = dataReal || null;
         }
     } else {
-        examesSelecionados = examesSelecionados.filter(e => e.codigo !== codigo);
+        // 🔥 REMOVE só esse exato (código + nome)
+        examesSelecionados = examesSelecionados.filter(e => !(e.codigo === codigo && e.nome === nome));
     }
     atualizarContadorModal();
 }
@@ -1303,8 +1308,11 @@ function atualizarDataExameModal(idx) {
     const check = document.getElementById(`checkExameModal_${idx}`);
     if (!check) return;
     
-    const codigo = subgrupoSelecionado && subgrupoSelecionado.exames[idx] ? subgrupoSelecionado.exames[idx].codigo : null;
-    if (!codigo) return;
+    const exameBase = subgrupoSelecionado && subgrupoSelecionado.exames[idx] ? subgrupoSelecionado.exames[idx] : null;
+    if (!exameBase) return;
+    
+    const codigo = exameBase.codigo;
+    const nome = exameBase.nome;
     
     const dataSolEl = document.getElementById(`dataSolModal_${idx}`);
     const dataRealEl = document.getElementById(`dataRealModal_${idx}`);
@@ -1312,9 +1320,9 @@ function atualizarDataExameModal(idx) {
     const dataReal = dataRealEl ? dataRealEl.value : '';
     
     if (check.checked) {
-        let exame = examesSelecionados.find(e => e.codigo === codigo);
+        // 🔥 USA CÓDIGO + NOME
+        let exame = examesSelecionados.find(e => e.codigo === codigo && e.nome === nome);
         if (!exame) {
-            const nome = subgrupoSelecionado.exames[idx].nome;
             examesSelecionados.push({ 
                 codigo, 
                 nome, 
@@ -1341,7 +1349,13 @@ function adicionarOutroExame() {
     const dataSol = document.getElementById('modalOutroDataSolicitacao').value;
     const dataReal = document.getElementById('modalOutroDataRealizacao').value;
     if (!codigo || !nome) { toast('❌ Informe código e nome!', 'warning'); return; }
-    if (examesSelecionados.find(e => e.codigo === codigo)) { toast('⚠️ Exame já adicionado!', 'warning'); return; }
+    
+    // 🔥 USA CÓDIGO + NOME
+    if (examesSelecionados.find(e => e.codigo === codigo && e.nome === nome)) { 
+        toast('⚠️ Exame já adicionado!', 'warning'); 
+        return; 
+    }
+    
     examesSelecionados.push({ codigo, nome, data_solicitacao: dataSol || null, data_realizacao: dataReal || null });
     atualizarExamesSelecionados();
     document.getElementById('modalOutroCodigo').value = '';
